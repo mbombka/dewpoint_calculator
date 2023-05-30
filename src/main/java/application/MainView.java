@@ -1,11 +1,8 @@
 package application;
 
 
-import java.util.HashMap;
 import java.util.Map;
-
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -21,25 +18,19 @@ import javafx.scene.text.Font;
 
 public class MainView {
 
-  
-   
+        LineChart<Number, Number> lineChart;
+        Map<Double, Double> temperatureMap;
+
         private int thickness = 10; //thickness in cm 
         private double thermalCoefficient = 0.0; // heat transfer coeficient
         private int temperature1 = 0; // temperature in 1 side in Celcius
         private int temperature2 = 0; // temperature in 2 side in Celcius
-        private double humidity = 0.0; // relative humidity in %
+        private double humidity = 0.0; // relative humidity in %        
 
-        LineChart<Number, Number> lineChart;
-        Map<Double, Double> temperatureMap;
-
-        //setttings
+        //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
         private Insets bigPadding = new Insets(20);
 
-
-        public MainView() {
-            
-        }
 
         public Parent getView() {
             BorderPane layout = new BorderPane();
@@ -69,7 +60,6 @@ public class MainView {
             {   
                 ValueThicknesSlider.setText(String.valueOf(newValue.intValue()) + " cm");
                 thickness = newValue.intValue();
-    
             });
 
             BorderPane borderPaneSliderThicknes = new BorderPane();
@@ -88,6 +78,7 @@ public class MainView {
             textFieldTemp1.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp1.setText(oldValue);
+
                 } else if(newValue.matches("-?")) {
                 } else {
                     try {
@@ -104,6 +95,7 @@ public class MainView {
             textFieldTemp2.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp2.setText(oldValue);
+
                 } else if(newValue.matches("-?")) {
                 } else {
                     try {
@@ -120,6 +112,7 @@ public class MainView {
             textFieldHumidity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldHumidity.setText(oldValue);
+
                 } else if(newValue.matches("-?")) {
                 } else {
                     try {
@@ -143,7 +136,7 @@ public class MainView {
             textFieldThermalCoefficient.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
                     textFieldThermalCoefficient.setText(oldValue);
-                
+
                 } else if(newValue.matches("-?0?.?")) {
                 } else {
                     try {
@@ -159,7 +152,6 @@ public class MainView {
             calculateButton.minHeight(30);
             calculateButton.minWidth(80);
             calculateButton.setOnAction((event) -> updateChart());
-
             
             HBox textParametersHBox2 = new HBox();
             textParametersHBox2.setPadding(bigPadding);
@@ -169,13 +161,10 @@ public class MainView {
             BorderPane bottomBorderPane = new BorderPane();
             bottomBorderPane.setLeft(textParametersHBox2);
             bottomBorderPane.setCenter(calculateButton);
-
-
     
             parametersVBox.getChildren().addAll(borderPaneSliderThicknes, textParametersHBox1, bottomBorderPane);
     
             layout.setTop(parametersVBox); 
-    
     
             return layout;
         }
