@@ -22,7 +22,7 @@ public class MainView {
         Map<Double, Double> temperatureMap;
 
         private int thickness = 10; //thickness in cm 
-        private double thermalCoefficient = 0.0; // heat transfer coeficient
+        private double thermalConductivity = 0.0; // heat transfer coeficient
         private int temperature1 = 0; // temperature in 1 side in Celcius
         private int temperature2 = 0; // temperature in 2 side in Celcius
         private double humidity = 0.0; // relative humidity in %        
@@ -72,7 +72,7 @@ public class MainView {
       
             //Text Parameters
             
-            Label labelTemp1 = new Label("Temperature 1 [C]");
+            Label labelTemp1 = new Label("Temperature inside [C]");
             labelTemp1.setPadding(HorizontalPadding);
             TextField textFieldTemp1 = new TextField();
             textFieldTemp1.textProperty().addListener((change, oldValue, newValue) -> {
@@ -89,7 +89,7 @@ public class MainView {
                 }    
             });
 
-            Label labelTemp2 = new Label("Temperature 2 [C]");
+            Label labelTemp2 = new Label("Temperature outside [C]");
             labelTemp2.setPadding(HorizontalPadding);
             TextField textFieldTemp2 = new TextField();
             textFieldTemp2.textProperty().addListener((change, oldValue, newValue) -> {
@@ -129,20 +129,20 @@ public class MainView {
             textParametersHBox1.getChildren().addAll(labelTemp1, textFieldTemp1, labelTemp2, textFieldTemp2,
                             labelHumidity, textFieldHumidity);
 
-            Label labelThermalCoefficient = new Label("Thermal Resistance [] ");
-            labelThermalCoefficient.setPadding(HorizontalPadding);
-            TextField textFieldThermalCoefficient = new TextField();
-            textFieldThermalCoefficient .setPadding(HorizontalPadding);
-            textFieldThermalCoefficient.textProperty().addListener((change, oldValue, newValue) -> {
+            Label labelThermalConductivity = new Label("Thermal conductivity K [] ");
+            labelThermalConductivity.setPadding(HorizontalPadding);
+            TextField textFieldThermalConductivity = new TextField();
+            textFieldThermalConductivity .setPadding(HorizontalPadding);
+            textFieldThermalConductivity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
-                    textFieldThermalCoefficient.setText(oldValue);
+                    textFieldThermalConductivity.setText(oldValue);
 
                 } else if(newValue.matches("-?0?.?")) {
                 } else {
                     try {
-                        this.thermalCoefficient = Double.valueOf(newValue.toString());
+                        this.thermalConductivity = Double.valueOf(newValue.toString());
                     } catch (NumberFormatException e) {                   
-                        textFieldThermalCoefficient.setText(oldValue);
+                        textFieldThermalConductivity.setText(oldValue);
                     }
                 } 
             });
@@ -156,7 +156,7 @@ public class MainView {
             HBox textParametersHBox2 = new HBox();
             textParametersHBox2.setPadding(bigPadding);
             textParametersHBox2.setMinHeight(20);
-            textParametersHBox2.getChildren().addAll(labelThermalCoefficient, textFieldThermalCoefficient, calculateButton);     
+            textParametersHBox2.getChildren().addAll(labelThermalConductivity, textFieldThermalConductivity, calculateButton);     
             
             BorderPane bottomBorderPane = new BorderPane();
             bottomBorderPane.setLeft(textParametersHBox2);
@@ -173,7 +173,7 @@ public class MainView {
         private void updateChart() {
             XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();
             temperatureChart.setName("temperature map");
-            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperature2, temperature1, thermalCoefficient);
+            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperature1, temperature2, thermalConductivity);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
     
