@@ -26,10 +26,10 @@ public class MainView {
         Map<Double, Double> temperatureMap;
 
         private int thickness = 10; //thickness in cm 
-        private double thermalConductivity = 0.034; // heat transfer coeficient
-        private int temperatureInside = 15; // temperature inside side in Celcius
-        private int temperatureOutside = -10; // temperature outside side in Celcius
-        private int humidity = 80; // relative humidity in %        
+        private double thermalCoefficient = 0.0; // heat transfer coeficient
+        private int temperature1 = 0; // temperature in 1 side in Celcius
+        private int temperature2 = 0; // temperature in 2 side in Celcius
+        private double humidity = 0.0; // relative humidity in %        
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
@@ -77,7 +77,7 @@ public class MainView {
       
             //Text Parameters
             
-            Label labelTemp1 = new Label("Temperature inside [°C]");
+            Label labelTemp1 = new Label("Temperature 1 [C]");
             labelTemp1.setPadding(HorizontalPadding);
             labelTemp1.setPrefHeight(labelMinHeight);
             TextField textFieldTemp1 = new TextField(String.valueOf(temperatureInside));
@@ -96,7 +96,7 @@ public class MainView {
                 }    
             });
 
-            Label labelTemp2 = new Label("Temperature outside [°C]");
+            Label labelTemp2 = new Label("Temperature 2 [C]");
             labelTemp2.setPadding(HorizontalPadding);
             labelTemp2.setPrefHeight(labelMinHeight);
             TextField textFieldTemp2 = new TextField(String.valueOf(temperatureOutside));
@@ -134,22 +134,20 @@ public class MainView {
                 } 
             });
 
-            Label labelThermalConductivity = new Label("Thermal conductivity K ");
-            labelThermalConductivity.setPadding(HorizontalPadding);
-            labelThermalConductivity.setPrefHeight(labelMinHeight);
-            TextField textFieldThermalConductivity = new TextField(String.valueOf(thermalConductivity));
-            textFieldThermalConductivity.setPrefHeight(labelMinHeight);
-            textFieldThermalConductivity .setPadding(HorizontalPadding);
-            textFieldThermalConductivity.textProperty().addListener((change, oldValue, newValue) -> {
+            Label labelThermalCoefficient = new Label("Thermal Resistance [] ");
+            labelThermalCoefficient.setPadding(HorizontalPadding);
+            TextField textFieldThermalCoefficient = new TextField();
+            textFieldThermalCoefficient .setPadding(HorizontalPadding);
+            textFieldThermalCoefficient.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
-                    textFieldThermalConductivity.setText(oldValue);
+                    textFieldThermalCoefficient.setText(oldValue);
 
                 } else if(newValue.matches("-?0?.?")) {
                 } else {
                     try {
-                        this.thermalConductivity = Double.valueOf(newValue.toString());
+                        this.thermalCoefficient = Double.valueOf(newValue.toString());
                     } catch (NumberFormatException e) {                   
-                        textFieldThermalConductivity.setText(oldValue);
+                        textFieldThermalCoefficient.setText(oldValue);
                     }
                 } 
             });
@@ -178,14 +176,12 @@ public class MainView {
             calculateButton.setFont(new Font(16));
             calculateButton.minHeight(30);
             calculateButton.minWidth(80);
-            calculateButton.setOnAction((event) -> {
-                xAxis.setLowerBound(0);
-                xAxis.setUpperBound(thickness);
-                yAxis.setLowerBound(temperatureOutside); 
-                yAxis.setUpperBound(temperatureInside);
-                updateChart();
-                labelCalculatedDewPoint.setText("Dew point calculated at: " + Calculator.dewPointTemperate(humidity, temperatureInside) + "[°C]")   ;
-            });
+            calculateButton.setOnAction((event) -> updateChart());
+            
+            HBox textParametersHBox2 = new HBox();
+            textParametersHBox2.setPadding(bigPadding);
+            textParametersHBox2.setMinHeight(20);
+            textParametersHBox2.getChildren().addAll(labelThermalCoefficient, textFieldThermalCoefficient, calculateButton);     
             
             BorderPane bottomBorderPane = new BorderPane();
             bottomBorderPane.setLeft(gridTextParameters);
@@ -206,7 +202,7 @@ public class MainView {
           
 
             temperatureChart.setName("temperature map");
-            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
+            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperature2, temperature1, thermalCoefficient);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
             XYChart.Series<Number, Number> dewPointChart = new XYChart.Series<>();
