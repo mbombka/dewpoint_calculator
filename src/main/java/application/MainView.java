@@ -79,7 +79,7 @@ public class MainView {
       
             //Text Parameters
             
-            Label labelTemp1 = new Label("Temperature inside [°C]");
+            Label labelTemp1 = new Label("Temperature 1 [C]");
             labelTemp1.setPadding(HorizontalPadding);
             labelTemp1.setPrefHeight(labelMinHeight);
             TextField textFieldTemp1 = new TextField(String.valueOf(temperatureInside));
@@ -98,7 +98,7 @@ public class MainView {
                 }    
             });
 
-            Label labelTemp2 = new Label("Temperature outside [°C]");
+            Label labelTemp2 = new Label("Temperature 2 [C]");
             labelTemp2.setPadding(HorizontalPadding);
             labelTemp2.setPrefHeight(labelMinHeight);
             TextField textFieldTemp2 = new TextField(String.valueOf(temperatureOutside));
@@ -136,22 +136,20 @@ public class MainView {
                 } 
             });
 
-            Label labelThermalConductivity = new Label("Thermal conductivity K ");
-            labelThermalConductivity.setPadding(HorizontalPadding);
-            labelThermalConductivity.setPrefHeight(labelMinHeight);
-            TextField textFieldThermalConductivity = new TextField(String.valueOf(thermalConductivity));
-            textFieldThermalConductivity.setPrefHeight(labelMinHeight);
-            textFieldThermalConductivity .setPadding(HorizontalPadding);
-            textFieldThermalConductivity.textProperty().addListener((change, oldValue, newValue) -> {
+            Label labelThermalCoefficient = new Label("Thermal Resistance [] ");
+            labelThermalCoefficient.setPadding(HorizontalPadding);
+            TextField textFieldThermalCoefficient = new TextField();
+            textFieldThermalCoefficient .setPadding(HorizontalPadding);
+            textFieldThermalCoefficient.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
-                    textFieldThermalConductivity.setText(oldValue);
+                    textFieldThermalCoefficient.setText(oldValue);
 
                 } else if(newValue.matches("-?0?.?")) {
                 } else {
                     try {
-                        this.thermalConductivity = Double.valueOf(newValue.toString());
+                        this.thermalCoefficient = Double.valueOf(newValue.toString());
                     } catch (NumberFormatException e) {                   
-                        textFieldThermalConductivity.setText(oldValue);
+                        textFieldThermalCoefficient.setText(oldValue);
                     }
                 } 
             });
