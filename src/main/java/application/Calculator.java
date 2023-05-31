@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class Calculator {
 
-    public final static Double theramlResistanceRsi = 0.13 ; // Thermal resistance Rsi for horizontal heat flow (0.10 for upwards heat flow, 0.17 for downwards heat flow)
-    public final static Double convectionHeatTransferCoefficient = 307.4; // calculated from website
-    public final static Double thicknessMapResolution = 0.5; // resolution for calculation of Temperature map 
+    
+    public final static Double convectionHeatTransferCoefficient = 37.4; // calculated from website
+    public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
 
     //calculate dewPoint at given temperature and humidity
     public static double dewPointTemperate(double humidity, int temperature) {     
@@ -18,13 +18,13 @@ public class Calculator {
     //calculate map of temperature for given thickness of material
     public static Map<Double, Double> calculateTemperatureMap(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity) {
         Map<Double, Double> temperatureMap = new HashMap<>();        
-        int steps = (int) Math.round(thickness/thicknessMapResolution);
+        int steps = (int) Math.round(thickness/thicknessMapResolution) + 1;
         Double[] temperatureArray = new Double[steps];
         temperatureArray[0] = (double) outsideTemperature; 
         temperatureArray[steps - 1] = calculateTemperature(thickness, insideTemperature, outsideTemperature, thermalConductivity);
         
         //fill array with temporary rounded values
-        for(int i = 1; i < steps; i ++ ) {
+        for(int i = 1; i < temperatureArray.length; i ++ ) {
             temperatureArray[i] = outsideTemperature +  ((double)(temperatureArray[steps - 1] - temperatureArray[0]) / steps) * i;  
         }
 
@@ -47,7 +47,7 @@ public class Calculator {
     //h ≈ 307.4 W/(m^2·K)
     //T= (kTa + LhTb)/(k + Lh)
 
-    public static double calculateTemperature(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
+    public static double calculateTemperature(double thickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
         thickness = thickness / 100;////partition thickness is in [cm], but unit is [m] thats why *100
         double T = (thermalConductivity * insideTemperature + thickness * convectionHeatTransferCoefficient * outsideTemperature) 
                     / (thermalConductivity + thickness * convectionHeatTransferCoefficient);

@@ -1,8 +1,6 @@
 package application;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -11,9 +9,7 @@ import java.io.IOException;
 /**
  * JavaFX App
  */
-public class App extends Application {
-
-    private static Scene scene;
+public class App extends Application {   
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -24,7 +20,7 @@ public class App extends Application {
    
          // 2. Show the application
          stage.setScene(view);
-         stage.setTitle("Savings calculator");
+         stage.setTitle("temperature calculator");
          stage.show();
     }
 

@@ -3,7 +3,6 @@ package application;
 
 import java.util.Map;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -14,7 +13,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
@@ -42,9 +40,13 @@ public class MainView {
             
               // create the x and y axis and Line chart
             xAxis= new NumberAxis(0, 30, 2);
-            yAxis = new NumberAxis();
+            xAxis.setLabel("insulation [cm]");
+            yAxis = new NumberAxis(-10, 20, 2);
+            yAxis.setLabel("temperature [°C]");
             lineChart = new LineChart<>(xAxis, yAxis);
             lineChart.setTitle("");
+            lineChart.setVerticalZeroLineVisible(false);
+            lineChart.setHorizontalZeroLineVisible(false);
     
             layout.setCenter(lineChart);
     
@@ -52,7 +54,7 @@ public class MainView {
             VBox parametersVBox = new VBox();   
 
             //Slider for thickness    
-            Label textSlider1 = new Label("Thickness in cm: ");
+            Label textSlider1 = new Label("Insulation cm: ");
             textSlider1.setFont(new Font(20));
             Slider thicknesSlider = new Slider(1, 100, 10);
             thicknesSlider.setShowTickLabels(true);
@@ -171,29 +173,39 @@ public class MainView {
             gridTextParameters.add(labelThermalConductivity, 0, 3);
             gridTextParameters.add(textFieldThermalConductivity, 1, 3);
         
-            Label labelCalculatedDewPoint = new Label();
-            labelCalculatedDewPoint.setPadding(new Insets(0, 0, 0, 500));
+            Label labelCalculatedDewPoint = new Label("Calculate dew point and temperature map for insulated air conduct.");
+            labelCalculatedDewPoint.setPadding(new Insets(10));
+            labelCalculatedDewPoint.setMinSize(200, 20);
 
             Button calculateButton = new Button(" Calculate ");
             calculateButton.setFont(new Font(16));
-            calculateButton.minHeight(30);
-            calculateButton.minWidth(80);
+            calculateButton.setMinSize(200, 50);
             calculateButton.setOnAction((event) -> {
                 xAxis.setLowerBound(0);
-                xAxis.setUpperBound(thickness);
+                xAxis.setUpperBound(thickness + 1);
                 yAxis.setLowerBound(temperatureOutside); 
                 yAxis.setUpperBound(temperatureInside);
                 updateChart();
                 labelCalculatedDewPoint.setText("Dew point calculated at: " + Calculator.dewPointTemperate(humidity, temperatureInside) + "[°C]")   ;
             });
+
+            
+            GridPane gridButton = new GridPane();
+           // gridButton.setPadding(bigPadding);
+            gridButton.setVgap(10);
+            gridButton.setHgap(50);
+            gridButton.add(calculateButton, 1, 1);
+            gridButton.add(labelCalculatedDewPoint, 1, 4);
+
+
             
             BorderPane bottomBorderPane = new BorderPane();
             bottomBorderPane.setLeft(gridTextParameters);
-            bottomBorderPane.setCenter(calculateButton);
+            bottomBorderPane.setCenter(gridButton);
 
             
     
-            parametersVBox.getChildren().addAll(borderPaneSliderThicknes,  bottomBorderPane, labelCalculatedDewPoint);
+            parametersVBox.getChildren().addAll(borderPaneSliderThicknes,  bottomBorderPane);
     
             layout.setTop(parametersVBox); 
     
@@ -206,6 +218,7 @@ public class MainView {
           
 
             temperatureChart.setName("temperature map");
+           // temperatureChart.getNode().setStyle("-fx-stroke: red");
             temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
@@ -214,11 +227,14 @@ public class MainView {
             double dewPointTemperature = Calculator.dewPointTemperate(humidity, temperatureInside);
             dewPointChart.getData().add(new XYChart.Data<Number, Number>(0, dewPointTemperature));
             dewPointChart.getData().add(new XYChart.Data<Number, Number>(thickness, dewPointTemperature));
-           
+   
            
             lineChart.getData().clear();
             lineChart.getData().add(temperatureChart);
+            temperatureChart.getNode().setStyle("-fx-stroke: orange;");
             lineChart.getData().add(dewPointChart);
+            dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");
+          
            
             
         }
