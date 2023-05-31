@@ -3,6 +3,7 @@ package application;
 
 import java.util.Map;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -12,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -27,11 +29,12 @@ public class MainView {
         private double thermalConductivity = 0.034; // heat transfer coeficient
         private int temperatureInside = 15; // temperature inside side in Celcius
         private int temperatureOutside = -10; // temperature outside side in Celcius
-        private double humidity = 80.0; // relative humidity in %        
+        private int humidity = 80; // relative humidity in %        
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
         private Insets bigPadding = new Insets(20);
+        private int labelMinHeight = 30;
 
 
         public Parent getView() {
@@ -41,7 +44,7 @@ public class MainView {
             xAxis= new NumberAxis(0, 30, 2);
             yAxis = new NumberAxis();
             lineChart = new LineChart<>(xAxis, yAxis);
-            lineChart.setTitle("Calculator");
+            lineChart.setTitle("");
     
             layout.setCenter(lineChart);
     
@@ -74,9 +77,11 @@ public class MainView {
       
             //Text Parameters
             
-            Label labelTemp1 = new Label("Temperature inside [C]");
+            Label labelTemp1 = new Label("Temperature inside [°C]");
             labelTemp1.setPadding(HorizontalPadding);
+            labelTemp1.setPrefHeight(labelMinHeight);
             TextField textFieldTemp1 = new TextField(String.valueOf(temperatureInside));
+            textFieldTemp1.setPrefHeight(labelMinHeight);
             textFieldTemp1.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp1.setText(oldValue);
@@ -91,9 +96,11 @@ public class MainView {
                 }    
             });
 
-            Label labelTemp2 = new Label("Temperature outside [C]");
+            Label labelTemp2 = new Label("Temperature outside [°C]");
             labelTemp2.setPadding(HorizontalPadding);
+            labelTemp2.setPrefHeight(labelMinHeight);
             TextField textFieldTemp2 = new TextField(String.valueOf(temperatureOutside));
+            textFieldTemp2.setPrefHeight(labelMinHeight);
             textFieldTemp2.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp2.setText(oldValue);
@@ -110,7 +117,9 @@ public class MainView {
 
             Label labelHumidity = new Label("Humidity [%]");
             labelHumidity.setPadding(HorizontalPadding);
+            labelHumidity.setPrefHeight(labelMinHeight);
             TextField textFieldHumidity = new TextField(String.valueOf(humidity));
+            textFieldHumidity.setPrefHeight(labelMinHeight);
             textFieldHumidity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldHumidity.setText(oldValue);
@@ -124,16 +133,12 @@ public class MainView {
                     }
                 } 
             });
-           
-            HBox textParametersHBox1 = new HBox();
-            textParametersHBox1.setPadding(bigPadding);
-            textParametersHBox1.setMinHeight(20);
-            textParametersHBox1.getChildren().addAll(labelTemp1, textFieldTemp1, labelTemp2, textFieldTemp2,
-                            labelHumidity, textFieldHumidity);
 
-            Label labelThermalConductivity = new Label("Thermal conductivity K [] ");
+            Label labelThermalConductivity = new Label("Thermal conductivity K ");
             labelThermalConductivity.setPadding(HorizontalPadding);
+            labelThermalConductivity.setPrefHeight(labelMinHeight);
             TextField textFieldThermalConductivity = new TextField(String.valueOf(thermalConductivity));
+            textFieldThermalConductivity.setPrefHeight(labelMinHeight);
             textFieldThermalConductivity .setPadding(HorizontalPadding);
             textFieldThermalConductivity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
@@ -149,22 +154,46 @@ public class MainView {
                 } 
             });
 
+            GridPane gridTextParameters = new GridPane();
+            gridTextParameters.setPadding(bigPadding);
+            gridTextParameters.setVgap(10);
+            gridTextParameters.setHgap(10);
+
+            gridTextParameters.add(labelTemp1, 0, 0);
+            gridTextParameters.add(textFieldTemp1, 1, 0);
+
+            gridTextParameters.add(labelTemp2, 0, 1);
+            gridTextParameters.add(textFieldTemp2, 1, 1);
+
+            gridTextParameters.add(labelHumidity, 0, 2);
+            gridTextParameters.add(textFieldHumidity, 1, 2);
+
+            gridTextParameters.add(labelThermalConductivity, 0, 3);
+            gridTextParameters.add(textFieldThermalConductivity, 1, 3);
+        
+            Label labelCalculatedDewPoint = new Label();
+            labelCalculatedDewPoint.setPadding(new Insets(0, 0, 0, 500));
+
             Button calculateButton = new Button(" Calculate ");
             calculateButton.setFont(new Font(16));
             calculateButton.minHeight(30);
             calculateButton.minWidth(80);
-            calculateButton.setOnAction((event) -> updateChart());
-            
-            HBox textParametersHBox2 = new HBox();
-            textParametersHBox2.setPadding(bigPadding);
-            textParametersHBox2.setMinHeight(20);
-            textParametersHBox2.getChildren().addAll(labelThermalConductivity, textFieldThermalConductivity, calculateButton);     
+            calculateButton.setOnAction((event) -> {
+                xAxis.setLowerBound(0);
+                xAxis.setUpperBound(thickness);
+                yAxis.setLowerBound(temperatureOutside); 
+                yAxis.setUpperBound(temperatureInside);
+                updateChart();
+                labelCalculatedDewPoint.setText("Dew point calculated at: " + Calculator.dewPointTemperate(humidity, temperatureInside) + "[°C]")   ;
+            });
             
             BorderPane bottomBorderPane = new BorderPane();
-            bottomBorderPane.setLeft(textParametersHBox2);
+            bottomBorderPane.setLeft(gridTextParameters);
             bottomBorderPane.setCenter(calculateButton);
+
+            
     
-            parametersVBox.getChildren().addAll(borderPaneSliderThicknes, textParametersHBox1, bottomBorderPane);
+            parametersVBox.getChildren().addAll(borderPaneSliderThicknes,  bottomBorderPane, labelCalculatedDewPoint);
     
             layout.setTop(parametersVBox); 
     
@@ -174,8 +203,7 @@ public class MainView {
 
         private void updateChart() {
             XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();
-            NumberAxis xAxis = new NumberAxis();
-            NumberAxis yAxis = new NumberAxis();
+          
 
             temperatureChart.setName("temperature map");
             temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
@@ -186,10 +214,8 @@ public class MainView {
             double dewPointTemperature = Calculator.dewPointTemperate(humidity, temperatureInside);
             dewPointChart.getData().add(new XYChart.Data<Number, Number>(0, dewPointTemperature));
             dewPointChart.getData().add(new XYChart.Data<Number, Number>(thickness, dewPointTemperature));
-                
-  //          xAxis= new NumberAxis(0, thickness, 1);
-  //          yAxis = new NumberAxis(temperature2, temperature2, 1);
-        //    lineChart = new LineChart<>(xAxis, yAxis);
+           
+           
             lineChart.getData().clear();
             lineChart.getData().add(temperatureChart);
             lineChart.getData().add(dewPointChart);
