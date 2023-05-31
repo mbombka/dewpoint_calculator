@@ -6,8 +6,10 @@ import java.util.Map;
 public class Calculator {
 
     public final static Double theramlResistanceRsi = 0.13 ; // Thermal resistance Rsi for horizontal heat flow (0.10 for upwards heat flow, 0.17 for downwards heat flow)
-    public final static Double convectionHeatTransferCoefficient = 307.4; // calculated from website
-    public final static Double thicknessMapResolution = 0.5; // resolution for calculation of Temperature map 
+    public final static Double convectionHeatTransferCoefficient = 307.4;
+    public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
+    //outside - colder side
+    //inside - hot side
 
     //calculate dewPoint at given temperature and humidity
     public static double dewPointTemperate(double humidity, int temperature) {     
@@ -15,17 +17,32 @@ public class Calculator {
         return  Math.round(dewpoint * 10)/10.0;
     }
 
+
+
+    //calculate temperature on inside(where the heat source is)  of partition, given air temperature on both sides, and thermal coefficient. 
+    public static double partitionTemperatureStep(double insideTemperature, double outsideTemperature, double thermalCoefficient, double partitionThickness) {
+        double heatConductivity = 1 / (partitionThickness * 100 / thermalCoefficient); //partition thickness is in [cm], but unit is [m] thats why *100
+        double result = insideTemperature - (heatConductivity * (insideTemperature - outsideTemperature)* theramlResistanceRsi);
+        result = Math.round(result * 100) / 100.0;
+        return result;
+    }
+
     //calculate map of temperature for given thickness of material
-    public static Map<Double, Double> calculateTemperatureMap(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity) {
+    public static Map<Double, Double> calculateTemperatureMap(int thickness, int insideTemperature, int outsideTemperature, double thermalCoefficient) {
         Map<Double, Double> temperatureMap = new HashMap<>();        
         int steps = (int) Math.round(thickness/thicknessMapResolution);
         Double[] temperatureArray = new Double[steps];
         temperatureArray[0] = (double) outsideTemperature; 
-        temperatureArray[steps - 1] = calculateTemperature(thickness, insideTemperature, outsideTemperature, thermalConductivity);
+        temperatureArray[steps - 1] = partitionTemperatureStep(insideTemperature, outsideTemperature, thermalCoefficient, thicknessMapResolution);
         
         //fill array with temporary rounded values
         for(int i = 1; i < steps; i ++ ) {
             temperatureArray[i] = outsideTemperature +  ((double)(temperatureArray[steps - 1] - temperatureArray[0]) / steps) * i;  
+        }
+
+        //make actual calculations
+        for(int i = 1; i < steps - 1; i ++ ) {
+             temperatureArray[i] = partitionTemperatureStep(temperatureArray[i], temperatureArray[i - 1], thermalCoefficient, thicknessMapResolution);
         }
 
         //save all temperatures to map
@@ -47,12 +64,18 @@ public class Calculator {
     //h ≈ 307.4 W/(m^2·K)
     //T= (kTa + LhTb)/(k + Lh)
 
-    public static double calculateTemperature(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
-        thickness = thickness / 100;////partition thickness is in [cm], but unit is [m] thats why *100
-        double T = (thermalConductivity * insideTemperature + thickness * convectionHeatTransferCoefficient * outsideTemperature) 
-                    / (thermalConductivity + thickness * convectionHeatTransferCoefficient);
+    public static double calculateTemperature(int partitionThickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
+        partitionThickness = partitionThickness * 100;////partition thickness is in [cm], but unit is [m] thats why *100
+        double T = (thermalConductivity * insideTemperature + partitionThickness * convectionHeatTransferCoefficient * outsideTemperature) 
+                    / (thermalConductivity + partitionThickness * convectionHeatTransferCoefficient);
        return T;
     }
+
+
+
+
+
+
 
     
 }
