@@ -19,13 +19,15 @@ import javafx.scene.text.Font;
 public class MainView {
 
         LineChart<Number, Number> lineChart;
+        NumberAxis xAxis;
+        NumberAxis yAxis;
         Map<Double, Double> temperatureMap;
 
         private int thickness = 10; //thickness in cm 
-        private double thermalConductivity = 0.0; // heat transfer coeficient
-        private int temperature1 = 0; // temperature in 1 side in Celcius
-        private int temperature2 = 0; // temperature in 2 side in Celcius
-        private double humidity = 0.0; // relative humidity in %        
+        private double thermalConductivity = 0.034; // heat transfer coeficient
+        private int temperatureInside = 15; // temperature inside side in Celcius
+        private int temperatureOutside = -10; // temperature outside side in Celcius
+        private double humidity = 80.0; // relative humidity in %        
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
@@ -36,8 +38,8 @@ public class MainView {
             BorderPane layout = new BorderPane();
             
               // create the x and y axis and Line chart
-            NumberAxis xAxis= new NumberAxis(0, 30, 2);
-            NumberAxis yAxis = new NumberAxis();
+            xAxis= new NumberAxis(0, 30, 2);
+            yAxis = new NumberAxis();
             lineChart = new LineChart<>(xAxis, yAxis);
             lineChart.setTitle("Calculator");
     
@@ -74,7 +76,7 @@ public class MainView {
             
             Label labelTemp1 = new Label("Temperature inside [C]");
             labelTemp1.setPadding(HorizontalPadding);
-            TextField textFieldTemp1 = new TextField();
+            TextField textFieldTemp1 = new TextField(String.valueOf(temperatureInside));
             textFieldTemp1.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp1.setText(oldValue);
@@ -82,7 +84,7 @@ public class MainView {
                 } else if(newValue.matches("-?")) {
                 } else {
                     try {
-                        this.temperature1 = Integer.valueOf(newValue.toString());
+                        this.temperatureInside = Integer.valueOf(newValue.toString());
                     } catch (NumberFormatException e) {                   
                         textFieldTemp1.setText(oldValue);
                     }
@@ -91,7 +93,7 @@ public class MainView {
 
             Label labelTemp2 = new Label("Temperature outside [C]");
             labelTemp2.setPadding(HorizontalPadding);
-            TextField textFieldTemp2 = new TextField();
+            TextField textFieldTemp2 = new TextField(String.valueOf(temperatureOutside));
             textFieldTemp2.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldTemp2.setText(oldValue);
@@ -99,7 +101,7 @@ public class MainView {
                 } else if(newValue.matches("-?")) {
                 } else {
                     try {
-                        this.temperature2 = Integer.valueOf(newValue.toString());
+                        this.temperatureOutside = Integer.valueOf(newValue.toString());
                     } catch (NumberFormatException e) {                   
                         textFieldTemp2.setText(oldValue);
                     }
@@ -108,7 +110,7 @@ public class MainView {
 
             Label labelHumidity = new Label("Humidity [%]");
             labelHumidity.setPadding(HorizontalPadding);
-            TextField textFieldHumidity = new TextField();
+            TextField textFieldHumidity = new TextField(String.valueOf(humidity));
             textFieldHumidity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?\\d*")){
                     textFieldHumidity.setText(oldValue);
@@ -131,7 +133,7 @@ public class MainView {
 
             Label labelThermalConductivity = new Label("Thermal conductivity K [] ");
             labelThermalConductivity.setPadding(HorizontalPadding);
-            TextField textFieldThermalConductivity = new TextField();
+            TextField textFieldThermalConductivity = new TextField(String.valueOf(thermalConductivity));
             textFieldThermalConductivity .setPadding(HorizontalPadding);
             textFieldThermalConductivity.textProperty().addListener((change, oldValue, newValue) -> {
                 if(!newValue.matches("-?(0.)?\\d*")){
@@ -172,13 +174,25 @@ public class MainView {
 
         private void updateChart() {
             XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();
+            NumberAxis xAxis = new NumberAxis();
+            NumberAxis yAxis = new NumberAxis();
+
             temperatureChart.setName("temperature map");
-            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperature1, temperature2, thermalConductivity);
+            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
-    
+            XYChart.Series<Number, Number> dewPointChart = new XYChart.Series<>();
+            dewPointChart.setName("dew point");
+            double dewPointTemperature = Calculator.dewPointTemperate(humidity, temperatureInside);
+            dewPointChart.getData().add(new XYChart.Data<Number, Number>(0, dewPointTemperature));
+            dewPointChart.getData().add(new XYChart.Data<Number, Number>(thickness, dewPointTemperature));
+                
+  //          xAxis= new NumberAxis(0, thickness, 1);
+  //          yAxis = new NumberAxis(temperature2, temperature2, 1);
+        //    lineChart = new LineChart<>(xAxis, yAxis);
             lineChart.getData().clear();
             lineChart.getData().add(temperatureChart);
+            lineChart.getData().add(dewPointChart);
            
             
         }
