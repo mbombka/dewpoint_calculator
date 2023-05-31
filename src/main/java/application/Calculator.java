@@ -7,12 +7,11 @@ public class Calculator {
 
     public final static Double theramlResistanceRsi = 0.13 ; // Thermal resistance Rsi for horizontal heat flow (0.10 for upwards heat flow, 0.17 for downwards heat flow)
     public final static Double convectionHeatTransferCoefficient = 307.4; // calculated from website
-    public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
+    public final static Double thicknessMapResolution = 0.5; // resolution for calculation of Temperature map 
 
     //calculate dewPoint at given temperature and humidity
-    public static double dewPointTemperate(double humidity, int temperature) {
-        double dewpoint = Math.round(Math.pow((humidity/100), 0.125)) * (112 + 0.9 * temperature) + (0.1 * temperature) - 112;
-        
+    public static double dewPointTemperate(double humidity, int temperature) {     
+        double dewpoint = temperature - ((100.0-humidity) / 5.0);
         return  Math.round(dewpoint * 10)/10.0;
     }
 
