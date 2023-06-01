@@ -6,7 +6,7 @@ import java.util.Map;
 public class Calculator {
 
     
-    public final static Double convectionHeatTransferCoefficient = 15.0; // calculated from website - 370.4
+    
     public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
 
     //calculate dewPoint at given temperature and humidity
@@ -16,12 +16,12 @@ public class Calculator {
     }
 
       //calculate map of temperature for given thickness of material
-      public static Map<Double, Double> calculateTemperatureMap(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity) {
+      public static Map<Double, Double> calculateTemperatureMapMethod1(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity, double convectionHeatTransferCoefficient) {
         Map<Double, Double> temperatureMap = new HashMap<>();        
         int steps = (int) Math.round(thickness/thicknessMapResolution) + 1;
         Double[] temperatureArray = new Double[steps];
         temperatureArray[0] = (double) outsideTemperature; 
-        temperatureArray[steps - 1] = calculateTemperature(thickness, insideTemperature, outsideTemperature, thermalConductivity);
+        temperatureArray[steps - 1] = calculateTemperatureMethod1(thickness, insideTemperature, outsideTemperature, thermalConductivity, convectionHeatTransferCoefficient);
         
         //fill array with temporary rounded values
         for(int i = 1; i < temperatureArray.length ; i ++ ) {
@@ -47,7 +47,7 @@ public class Calculator {
     //h ≈ 307.4 W/(m^2·K)
     //T= (kTa + LhTb)/(k + Lh)
 
-    public static double calculateTemperature(double thickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
+    public static double calculateTemperatureMethod1(double thickness, int insideTemperature, int outsideTemperature, double thermalConductivity, double convectionHeatTransferCoefficient){
         thickness = thickness / 100;////partition thickness is in [cm], but unit is [m] thats why /100
        
         double T = ((thermalConductivity * insideTemperature) + (thickness * convectionHeatTransferCoefficient * outsideTemperature)) 

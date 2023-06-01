@@ -27,7 +27,8 @@ public class MainView {
         private double thermalConductivity = 2.7; // heat transfer coeficient
         private int temperatureInside = 55; // temperature inside side in Celcius
         private int temperatureOutside = 20; // temperature outside side in Celcius
-        private int humidity = 80; // relative humidity in %        
+        private int humidity = 80; // relative humidity in %   
+        private double convectionHeatTransferCoefficient = 15;   // calculated from website - 370.4   
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
@@ -156,6 +157,26 @@ public class MainView {
                 } 
             });
 
+            Label labelConvHeatCoefficient = new Label("Convection heat transf. coef. h");
+            labelConvHeatCoefficient.setPadding(HorizontalPadding);
+            labelConvHeatCoefficient.setPrefHeight(labelMinHeight);
+            TextField textFieldConvHeatCoefficient = new TextField(String.valueOf(convectionHeatTransferCoefficient));
+            textFieldConvHeatCoefficient.setPrefHeight(labelMinHeight);
+            textFieldConvHeatCoefficient .setPadding(HorizontalPadding);
+            textFieldConvHeatCoefficient.textProperty().addListener((change, oldValue, newValue) -> {
+                if(!newValue.matches("\\d*.?\\d*")){
+                    textFieldConvHeatCoefficient.setText(oldValue);
+
+                } else if(newValue.matches("\\d?.?")) {
+                } else {
+                    try {
+                        this.convectionHeatTransferCoefficient = Double.valueOf(newValue.toString());
+                    } catch (NumberFormatException e) {                   
+                        textFieldConvHeatCoefficient.setText(oldValue);
+                    }
+                } 
+            });
+
             GridPane gridTextParameters = new GridPane();
             gridTextParameters.setPadding(bigPadding);
             gridTextParameters.setVgap(10);
@@ -172,6 +193,9 @@ public class MainView {
 
             gridTextParameters.add(labelThermalConductivity, 0, 3);
             gridTextParameters.add(textFieldThermalConductivity, 1, 3);
+
+            gridTextParameters.add(labelConvHeatCoefficient, 0, 4);
+            gridTextParameters.add(textFieldConvHeatCoefficient, 1, 4);
         
             Label labelCalculatedDewPoint = new Label("Calculate dew point and temperature map for insulated air conduct.");
             labelCalculatedDewPoint.setPadding(new Insets(10));
@@ -218,7 +242,7 @@ public class MainView {
           
 
             temperatureChart.setName("temperature map");     
-            temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
+            temperatureMap = Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
             XYChart.Series<Number, Number> dewPointChart = new XYChart.Series<>();
@@ -232,8 +256,7 @@ public class MainView {
             lineChart.getData().add(temperatureChart);
             temperatureChart.getNode().setStyle("-fx-stroke: orange;");
             lineChart.getData().add(dewPointChart);
-            dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");
-          
+            dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");       
            
             
         }
