@@ -42,7 +42,6 @@ public class MainView {
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
-        private Insets bigPadding = new Insets(20);
         private int labelMinHeight = 30;
 
 
@@ -305,14 +304,10 @@ public class MainView {
             gridButton.add(comboBoxMethods, 1, 0);
             gridButton.add(calculateButton, 1, 1);
             gridButton.add(labelCalculatedDewPoint, 1, 4);
-
-
             
             BorderPane bottomBorderPane = new BorderPane();
             bottomBorderPane.setLeft(gridTextParameters);
-            bottomBorderPane.setCenter(gridButton);
-
-            
+            bottomBorderPane.setCenter(gridButton);            
     
             parametersVBox.getChildren().addAll(borderPaneSliderThicknes,  bottomBorderPane);
     
