@@ -6,7 +6,7 @@ import java.util.Map;
 public class Calculator {
 
     
-    public final static Double convectionHeatTransferCoefficient = 370.0; // calculated from website - 370.4
+    public final static Double convectionHeatTransferCoefficient = 15.0; // calculated from website - 370.4
     public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
 
     //calculate dewPoint at given temperature and humidity
@@ -48,7 +48,7 @@ public class Calculator {
     //T= (kTa + LhTb)/(k + Lh)
 
     public static double calculateTemperature(double thickness, int insideTemperature, int outsideTemperature, double thermalConductivity){
-        thickness = thickness * 100;////partition thickness is in [cm], but unit is [m] thats why /100
+        thickness = thickness / 100;////partition thickness is in [cm], but unit is [m] thats why /100
        
         double T = ((thermalConductivity * insideTemperature) + (thickness * convectionHeatTransferCoefficient * outsideTemperature)) 
                     / (thermalConductivity + (thickness * convectionHeatTransferCoefficient));

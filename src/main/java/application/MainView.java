@@ -23,10 +23,10 @@ public class MainView {
         NumberAxis yAxis;
         Map<Double, Double> temperatureMap;
 
-        private int thickness = 10; //thickness in cm 
-        private double thermalConductivity = 0.034; // heat transfer coeficient
-        private int temperatureInside = 15; // temperature inside side in Celcius
-        private int temperatureOutside = -10; // temperature outside side in Celcius
+        private int thickness = 20; //thickness in cm 
+        private double thermalConductivity = 2.7; // heat transfer coeficient
+        private int temperatureInside = 55; // temperature inside side in Celcius
+        private int temperatureOutside = 20; // temperature outside side in Celcius
         private int humidity = 80; // relative humidity in %        
 
         //visual setttings
@@ -39,9 +39,9 @@ public class MainView {
             BorderPane layout = new BorderPane();
             
               // create the x and y axis and Line chart
-            xAxis= new NumberAxis();//0, 30, 2);
+            xAxis= new NumberAxis(0, 30, 2);
             xAxis.setLabel("insulation [cm]");
-            yAxis = new NumberAxis();//-10, 20, 2);
+            yAxis = new NumberAxis(-10, 20, 2);
             yAxis.setLabel("temperature [°C]");
             lineChart = new LineChart<>(xAxis, yAxis);
             lineChart.setTitle("");
@@ -217,8 +217,7 @@ public class MainView {
             XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();
           
 
-            temperatureChart.setName("temperature map");
-           // temperatureChart.getNode().setStyle("-fx-stroke: red");
+            temperatureChart.setName("temperature map");     
             temperatureMap = Calculator.calculateTemperatureMap(thickness, temperatureInside, temperatureOutside, thermalConductivity);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
