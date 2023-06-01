@@ -1,13 +1,19 @@
 package application;
 
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -28,7 +34,12 @@ public class MainView {
         private int temperatureInside = 55; // temperature inside side in Celcius
         private int temperatureOutside = 20; // temperature outside side in Celcius
         private int humidity = 80; // relative humidity in %   
-        private double convectionHeatTransferCoefficient = 15;   // calculated from website - 370.4   
+        private double convectionHeatTransferCoefficient = 15;   // calculated from website - 370.4 
+        private double density = 110; // density of material, for wool 110
+        private double specificHeat = 1600; //specific heat capacity of material, for wool = 1600  
+
+        private final String methods[] = {"Convection and conduction equation", "Temperature distribution" };
+        private String selectedMethod = methods[0];
 
         //visual setttings
         private Insets HorizontalPadding = new Insets(0, 8, 0, 8);
@@ -177,6 +188,47 @@ public class MainView {
                 } 
             });
 
+       
+            Label labelDensity = new Label("Density ");
+            labelDensity.setPadding(HorizontalPadding);
+            labelDensity.setPrefHeight(labelMinHeight);
+            TextField textFieldDensity = new TextField(String.valueOf(density));
+            textFieldDensity.setPrefHeight(labelMinHeight);
+            textFieldDensity .setPadding(HorizontalPadding);
+            textFieldDensity.textProperty().addListener((change, oldValue, newValue) -> {
+                if(!newValue.matches("\\d*.?\\d*")){
+                    textFieldDensity.setText(oldValue);
+
+                } else if(newValue.matches("\\d?.?")) {
+                } else {
+                    try {
+                        this.density = Double.valueOf(newValue.toString());
+                    } catch (NumberFormatException e) {                   
+                        textFieldDensity.setText(oldValue);
+                    }
+                } 
+            });
+
+            Label labelSpecificHeat = new Label("Specific heat ");
+            labelSpecificHeat.setPadding(HorizontalPadding);
+            labelSpecificHeat.setPrefHeight(labelMinHeight);
+            TextField textSpecificHeat = new TextField(String.valueOf(specificHeat));
+            textSpecificHeat.setPrefHeight(labelMinHeight);
+            textSpecificHeat .setPadding(HorizontalPadding);
+            textSpecificHeat.textProperty().addListener((change, oldValue, newValue) -> {
+                if(!newValue.matches("\\d*.?\\d*")){
+                    textSpecificHeat.setText(oldValue);
+
+                } else if(newValue.matches("\\d?.?")) {
+                } else {
+                    try {
+                        this.specificHeat = Double.valueOf(newValue.toString());
+                    } catch (NumberFormatException e) {                   
+                        textSpecificHeat.setText(oldValue);
+                    }
+                } 
+            });
+
             GridPane gridTextParameters = new GridPane();
             gridTextParameters.setPadding(bigPadding);
             gridTextParameters.setVgap(10);
@@ -196,7 +248,19 @@ public class MainView {
 
             gridTextParameters.add(labelConvHeatCoefficient, 0, 4);
             gridTextParameters.add(textFieldConvHeatCoefficient, 1, 4);
-        
+
+            gridTextParameters.add(labelDensity, 0, 4);
+            gridTextParameters.add(textFieldDensity, 1, 4);
+
+            gridTextParameters.add(labelSpecificHeat, 0, 5);
+            gridTextParameters.add(textSpecificHeat, 1, 5);
+
+
+            //Combo box for method
+            Label comboBoxLabel = new Label("Select method for calculation");
+           
+            ComboBox<String> comboBoxMethods = new ComboBox<>(FXCollections.observableArrayList(methods));
+            comboBoxMethods.getSelectionModel().selectFirst();
             Label labelCalculatedDewPoint = new Label("Calculate dew point and temperature map for insulated air conduct.");
             labelCalculatedDewPoint.setPadding(new Insets(10));
             labelCalculatedDewPoint.setMinSize(200, 20);
@@ -218,6 +282,8 @@ public class MainView {
            // gridButton.setPadding(bigPadding);
             gridButton.setVgap(10);
             gridButton.setHgap(50);
+            gridButton.add(comboBoxLabel, 0, 0);
+            gridButton.add(comboBoxMethods, 1, 0);
             gridButton.add(calculateButton, 1, 1);
             gridButton.add(labelCalculatedDewPoint, 1, 4);
 
@@ -242,7 +308,7 @@ public class MainView {
           
 
             temperatureChart.setName("temperature map");     
-            temperatureMap = Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
+            temperatureMap = methodSelector(selectedMethod);
             temperatureMap.entrySet().stream().forEach(pair -> temperatureChart.getData().add(new XYChart.Data<Number, Number>(pair.getKey(), pair.getValue())) );  
            
             XYChart.Series<Number, Number> dewPointChart = new XYChart.Series<>();
@@ -259,5 +325,20 @@ public class MainView {
             dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");       
            
             
+        }
+
+        private Map<Double, Double> methodSelector(String method) {
+            int methodNumber = 1;
+            Map<Double, Double> temperatureMap = new HashMap<>();    
+            for(int i = 0; i < this.methods.length; i++) {
+                if(this.methods[i].equals(method)) {
+                    methodNumber = i + 1;
+                }
+            }
+            switch(methodNumber) {
+                case 1 : temperatureMap =  Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
+                case 2 : temperatureMap = Calculator.calculateTemperatureMapMethod2(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
+            }
+            return temperatureMap;
         }
 }
