@@ -55,6 +55,10 @@ public class Calculator {
        return T;
     }
 
+    public static Map<Double, Double> calculateTemperatureMapMethod2(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity, double convectionHeatTransferCoefficient){
+        
+    }
+
 
 
 

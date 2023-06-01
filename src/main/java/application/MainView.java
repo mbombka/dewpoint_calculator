@@ -1,8 +1,7 @@
 package application;
 
 
-import java.util.Arrays;
-import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class MainView {
         private double density = 110; // density of material, for wool 110
         private double specificHeat = 1600; //specific heat capacity of material, for wool = 1600  
 
-        private final String methods[] = {"Convection and conduction equation", "Temperature distribution" };
+        private final String methods[] = {"Convection and conduction equation", "Temperature distribution" };  
         private String selectedMethod = methods[0];
 
         //visual setttings
@@ -192,6 +191,7 @@ public class MainView {
             Label labelDensity = new Label("Density ");
             labelDensity.setPadding(HorizontalPadding);
             labelDensity.setPrefHeight(labelMinHeight);
+            labelDensity.setVisible(false);
             TextField textFieldDensity = new TextField(String.valueOf(density));
             textFieldDensity.setPrefHeight(labelMinHeight);
             textFieldDensity .setPadding(HorizontalPadding);
@@ -208,6 +208,7 @@ public class MainView {
                     }
                 } 
             });
+            textFieldDensity.setVisible(false);
 
             Label labelSpecificHeat = new Label("Specific heat ");
             labelSpecificHeat.setPadding(HorizontalPadding);
@@ -261,6 +262,21 @@ public class MainView {
            
             ComboBox<String> comboBoxMethods = new ComboBox<>(FXCollections.observableArrayList(methods));
             comboBoxMethods.getSelectionModel().selectFirst();
+            comboBoxMethods.setOnAction(event -> {
+                selectedMethod = comboBoxMethods.getValue();
+
+                //set visibility of labels and textDields
+                if(selectedMethod.equals(methods[0])){ //
+                    labelThermalConductivity.setVisible(selectedMethod.equals(methods[0]));
+                    textFieldThermalConductivity.setVisible(selectedMethod.equals(methods[0]));
+
+                    labelDensity.setVisible(selectedMethod.equals(methods[1]));
+                    textFieldDensity.setVisible(selectedMethod.equals(methods[1]));
+                    labelSpecificHeat.setVisible(selectedMethod.equals(methods[1]));
+                    textSpecificHeat.setVisible(selectedMethod.equals(methods[1]));                    
+                }
+            });
+
             Label labelCalculatedDewPoint = new Label("Calculate dew point and temperature map for insulated air conduct.");
             labelCalculatedDewPoint.setPadding(new Insets(10));
             labelCalculatedDewPoint.setMinSize(200, 20);
@@ -304,8 +320,7 @@ public class MainView {
 
 
         private void updateChart() {
-            XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();
-          
+            XYChart.Series<Number, Number> temperatureChart = new XYChart.Series<>();          
 
             temperatureChart.setName("temperature map");     
             temperatureMap = methodSelector(selectedMethod);
@@ -322,9 +337,7 @@ public class MainView {
             lineChart.getData().add(temperatureChart);
             temperatureChart.getNode().setStyle("-fx-stroke: orange;");
             lineChart.getData().add(dewPointChart);
-            dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");       
-           
-            
+            dewPointChart.getNode().setStyle("-fx-stroke: lightblue;");    
         }
 
         private Map<Double, Double> methodSelector(String method) {
@@ -337,8 +350,10 @@ public class MainView {
             }
             switch(methodNumber) {
                 case 1 : temperatureMap =  Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
-                case 2 : temperatureMap = Calculator.calculateTemperatureMapMethod2(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
+                case 2 : temperatureMap = Calculator.calculateTemperatureMapMethod2(thickness, temperatureInside, temperatureOutside, thermalConductivity, density, specificHeat);
             }
             return temperatureMap;
         }
+
+        
 }
