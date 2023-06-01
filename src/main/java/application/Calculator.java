@@ -3,9 +3,7 @@ package application;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Calculator {
-
-    
+public class Calculator {    
     
     public final static Double thicknessMapResolution = 1.0; // resolution for calculation of Temperature map 
 
@@ -55,8 +53,19 @@ public class Calculator {
        return T;
     }
 
-    public static Map<Double, Double> calculateTemperatureMapMethod2(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity, double convectionHeatTransferCoefficient){
-        
+    //this is temperature distribution method for calculating temperature map
+    public static Map<Double, Double> calculateTemperatureMapMethod2(int thickness, int insideTemperature, int outsideTemperature, double thermalConductivity, double density, double specificHeat){
+        Map<Double, Double> temperatureMap = new HashMap<>();        
+        double x = 0.0 ; //distance in partition
+
+        while(x <= thickness) {
+            double temperature = outsideTemperature + (insideTemperature - outsideTemperature) *
+            (1 - Math.exp(-x * Math.sqrt(thermalConductivity / (density * specificHeat))));
+            x += thicknessMapResolution;
+            temperatureMap.put((double)Math.round(x / thicknessMapResolution), temperature);
+        }
+
+        return temperatureMap;
     }
 
 

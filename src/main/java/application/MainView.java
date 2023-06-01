@@ -37,7 +37,7 @@ public class MainView {
         private double density = 110; // density of material, for wool 110
         private double specificHeat = 1600; //specific heat capacity of material, for wool = 1600  
 
-        private final String methods[] = {"Convection and conduction equation", "Temperature distribution" };  
+        private final String methods[] = {"Convection and conduction equation method", "Temperature distribution method" };  
         private String selectedMethod = methods[0];
 
         //visual setttings
@@ -46,7 +46,7 @@ public class MainView {
         private int labelMinHeight = 30;
 
 
-        public Parent getView() {
+        protected Parent getView() {
             BorderPane layout = new BorderPane();
             
               // create the x and y axis and Line chart
@@ -213,6 +213,7 @@ public class MainView {
             Label labelSpecificHeat = new Label("Specific heat ");
             labelSpecificHeat.setPadding(HorizontalPadding);
             labelSpecificHeat.setPrefHeight(labelMinHeight);
+            labelSpecificHeat.setVisible(false);
             TextField textSpecificHeat = new TextField(String.valueOf(specificHeat));
             textSpecificHeat.setPrefHeight(labelMinHeight);
             textSpecificHeat .setPadding(HorizontalPadding);
@@ -229,9 +230,10 @@ public class MainView {
                     }
                 } 
             });
+            textSpecificHeat.setVisible(false);
 
             GridPane gridTextParameters = new GridPane();
-            gridTextParameters.setPadding(bigPadding);
+            gridTextParameters.setPadding(new Insets(5, 20, 5, 0));
             gridTextParameters.setVgap(10);
             gridTextParameters.setHgap(10);
 
@@ -258,23 +260,24 @@ public class MainView {
 
 
             //Combo box for method
-            Label comboBoxLabel = new Label("Select method for calculation");
+          
            
             ComboBox<String> comboBoxMethods = new ComboBox<>(FXCollections.observableArrayList(methods));
             comboBoxMethods.getSelectionModel().selectFirst();
+            comboBoxMethods.setMinWidth(300);
             comboBoxMethods.setOnAction(event -> {
                 selectedMethod = comboBoxMethods.getValue();
 
                 //set visibility of labels and textDields
-                if(selectedMethod.equals(methods[0])){ //
-                    labelThermalConductivity.setVisible(selectedMethod.equals(methods[0]));
-                    textFieldThermalConductivity.setVisible(selectedMethod.equals(methods[0]));
+               
+                labelConvHeatCoefficient.setVisible(selectedMethod.equals(methods[0]));
+                textFieldConvHeatCoefficient.setVisible(selectedMethod.equals(methods[0]));
 
-                    labelDensity.setVisible(selectedMethod.equals(methods[1]));
-                    textFieldDensity.setVisible(selectedMethod.equals(methods[1]));
-                    labelSpecificHeat.setVisible(selectedMethod.equals(methods[1]));
-                    textSpecificHeat.setVisible(selectedMethod.equals(methods[1]));                    
-                }
+                labelDensity.setVisible(selectedMethod.equals(methods[1]));
+                textFieldDensity.setVisible(selectedMethod.equals(methods[1]));
+                labelSpecificHeat.setVisible(selectedMethod.equals(methods[1]));
+                textSpecificHeat.setVisible(selectedMethod.equals(methods[1]));                        
+                
             });
 
             Label labelCalculatedDewPoint = new Label("Calculate dew point and temperature map for insulated air conduct.");
@@ -283,7 +286,8 @@ public class MainView {
 
             Button calculateButton = new Button(" Calculate ");
             calculateButton.setFont(new Font(16));
-            calculateButton.setMinSize(200, 50);
+            calculateButton.setMinSize(300, 50);
+            //calculateButton.setMinWidth(comboBoxMethods.getWidth());
             calculateButton.setOnAction((event) -> {
                 xAxis.setLowerBound(0);
                 xAxis.setUpperBound(thickness + 1);
@@ -298,7 +302,6 @@ public class MainView {
            // gridButton.setPadding(bigPadding);
             gridButton.setVgap(10);
             gridButton.setHgap(50);
-            gridButton.add(comboBoxLabel, 0, 0);
             gridButton.add(comboBoxMethods, 1, 0);
             gridButton.add(calculateButton, 1, 1);
             gridButton.add(labelCalculatedDewPoint, 1, 4);
@@ -349,8 +352,12 @@ public class MainView {
                 }
             }
             switch(methodNumber) {
-                case 1 : temperatureMap =  Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
-                case 2 : temperatureMap = Calculator.calculateTemperatureMapMethod2(thickness, temperatureInside, temperatureOutside, thermalConductivity, density, specificHeat);
+                case 1 : 
+                    temperatureMap =  Calculator.calculateTemperatureMapMethod1(thickness, temperatureInside, temperatureOutside, thermalConductivity, convectionHeatTransferCoefficient);
+                    break;
+                case 2 : 
+                    temperatureMap = Calculator.calculateTemperatureMapMethod2(thickness, temperatureInside, temperatureOutside, thermalConductivity, density, specificHeat);
+                    break;
             }
             return temperatureMap;
         }
